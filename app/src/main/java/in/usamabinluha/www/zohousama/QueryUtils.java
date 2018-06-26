@@ -31,15 +31,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 
 public final class QueryUtils {
 
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
     private static int currentPage = 1;
     private static int totalPages = 1;
-    private static ArrayList<User> users = new ArrayList<>();
+    private static List<User> users = new ArrayList<>();
 
-    public static ArrayList<User> fetchUserData(String requestUrl) {
+    public static List<User> fetchUserData(String requestUrl) {
         for (currentPage = 1; currentPage <= totalPages; currentPage++) {
             URL url = createUrl(requestUrl + currentPage);
             String jsonResponse = null;
@@ -125,7 +126,12 @@ public final class QueryUtils {
                 String firstName = currentUser.getString("first_name");
                 String lastName = currentUser.getString("last_name");
                 String url = currentUser.getString("avatar");
-                User user = new User(id, firstName, lastName, url);
+                User user = new User();
+                user.setId(id);
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+                user.setUrl(url);
+                UserLoader.roomDb.userDao().addUser(user);
                 users.add(user);
             }
 

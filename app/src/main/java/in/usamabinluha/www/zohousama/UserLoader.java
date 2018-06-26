@@ -1,15 +1,17 @@
 package in.usamabinluha.www.zohousama;
 
+import android.arch.persistence.room.Room;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import com.kosalgeek.android.caching.FileCacher;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
-public class UserLoader extends AsyncTaskLoader<ArrayList<User>> {
+public class UserLoader extends AsyncTaskLoader<List<User>> {
 
     private static final String LOG_TAG = UserLoader.class.getName();
     private String mUrl;
+    public static UserRoomDb roomDb;
 
     public UserLoader(Context context, String url) {
         super(context);
@@ -22,17 +24,12 @@ public class UserLoader extends AsyncTaskLoader<ArrayList<User>> {
     }
 
     @Override
-    public ArrayList<User> loadInBackground() {
+    public List<User> loadInBackground() {
         if (mUrl == null) {
             return null;
         }
-        ArrayList<User> users = QueryUtils.fetchUserData(mUrl);
-        FileCacher<ArrayList<User>> fc = new FileCacher<>(getContext(), "usama.srl");
-        try {
-            fc.writeCache(users);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        roomDb = Room.databaseBuilder(getContext(), UserRoomDb.class, "userdb").build();
+        List<User> users = QueryUtils.fetchUserData(mUrl);
         return users;
     }
 }

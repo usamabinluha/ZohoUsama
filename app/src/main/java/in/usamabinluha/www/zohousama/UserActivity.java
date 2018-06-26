@@ -3,6 +3,7 @@ package in.usamabinluha.www.zohousama;
 
 import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Loader;
 import android.net.ConnectivityManager;
@@ -15,12 +16,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import com.kosalgeek.android.caching.FileCacher;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 public class UserActivity extends AppCompatActivity
-        implements LoaderCallbacks<ArrayList<User>> {
+        implements LoaderCallbacks<List<User>> {
 
     private static final String USER_REQUEST_URL =
             "https://reqres.in/api/users?page=";
@@ -28,6 +27,7 @@ public class UserActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     private RecyclerView.Adapter myAdapter;
     private TextView mEmptyStateTextView;
+    private static UserRoomDb roomDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,20 +44,14 @@ public class UserActivity extends AppCompatActivity
         } else {
             View loadingIndicator = findViewById(R.id.loading_indicator);
             loadingIndicator.setVisibility(View.GONE);
-            ArrayList<User> offlineList = new ArrayList<>();
-            FileCacher<ArrayList<User>> fc = new FileCacher<>(UserActivity.this, "usama.srl");
-            if (fc.hasCache()) {
-                try {
-                    offlineList = fc.readCache();
-                    mEmptyStateTextView.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    if (offlineList != null && !offlineList.isEmpty()) {
-                        myAdapter = new MyAdapter(offlineList, UserActivity.this);
-                        recyclerView.setAdapter(myAdapter);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            List<User> offlineList;
+            roomDb = Room.databaseBuilder(getApplicationContext(), UserRoomDb.class, "userdb").fallbackToDestructiveMigration().allowMainThreadQueries().build();
+            offlineList =roomDb.userDao().getUsers();
+            mEmptyStateTextView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            if (offlineList != null && !offlineList.isEmpty()) {
+                myAdapter = new MyAdapter(offlineList, UserActivity.this);
+                recyclerView.setAdapter(myAdapter);
             }
         }
     }
@@ -73,12 +67,12 @@ public class UserActivity extends AppCompatActivity
     }
 
     @Override
-    public Loader<ArrayList<User>> onCreateLoader(int i, Bundle bundle) {
+    public Loader<List<User>> onCreateLoader(int i, Bundle bundle) {
         return new UserLoader(this, Uri.parse(USER_REQUEST_URL).toString());
     }
 
     @Override
-    public void onLoadFinished(Loader<ArrayList<User>> loader, ArrayList<User> users) {
+    public void onLoadFinished(Loader<List<User>> loader, List<User> users) {
         View loadingIndicator = findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.GONE);
         mEmptyStateTextView.setVisibility(View.GONE);
@@ -90,7 +84,7 @@ public class UserActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoaderReset(Loader<ArrayList<User>> loader) {
+    public void onLoaderReset(Loader<List<User>> loader) {
     }
 
 }

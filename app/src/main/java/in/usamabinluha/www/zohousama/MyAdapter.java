@@ -18,13 +18,14 @@ import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
-    private ArrayList<User> users;
+    private List<User> users;
     private Context context;
 
-    public MyAdapter(ArrayList<User> users, Context context) {
+    public MyAdapter(List<User> users, Context context) {
         this.users = users;
         this.context = context;
     }
