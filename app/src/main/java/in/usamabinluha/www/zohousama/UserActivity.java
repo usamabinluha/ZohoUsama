@@ -6,6 +6,7 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -23,6 +24,7 @@ public class UserActivity extends AppCompatActivity
 
     private static final String USER_REQUEST_URL =
             "https://reqres.in/api/users?page=";
+    private static boolean firstBoot = true;
     private static final int USER_LOADER_ID = 1;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter myAdapter;
@@ -35,12 +37,17 @@ public class UserActivity extends AppCompatActivity
         setContentView(R.layout.user_activity);
         intializeUi();
 
+        SharedPreferences prefs = getSharedPreferences("test", MODE_PRIVATE);
+        firstBoot = prefs.getBoolean("firstBoot", true);
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = null;
         if (connMgr != null) networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
+        if (networkInfo != null && networkInfo.isConnected() && firstBoot) {
             LoaderManager loaderManager = getLoaderManager();
             loaderManager.initLoader(USER_LOADER_ID, null, this);
+            SharedPreferences.Editor editor = getSharedPreferences("test", MODE_PRIVATE).edit();
+            editor.putBoolean("firstBoot", false);
+            editor.apply();
         } else {
             View loadingIndicator = findViewById(R.id.loading_indicator);
             loadingIndicator.setVisibility(View.GONE);
