@@ -35,13 +35,13 @@ public class UserActivity extends AppCompatActivity
         setContentView(R.layout.user_activity);
         intializeUi();
 
-        /*ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = null;
         if (connMgr != null) networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             LoaderManager loaderManager = getLoaderManager();
             loaderManager.initLoader(USER_LOADER_ID, null, this);
-        } else {*/
+        } else {
             View loadingIndicator = findViewById(R.id.loading_indicator);
             loadingIndicator.setVisibility(View.GONE);
             List<User> offlineList;
@@ -52,7 +52,7 @@ public class UserActivity extends AppCompatActivity
             if (offlineList != null && !offlineList.isEmpty()) {
                 myAdapter = new MyAdapter(offlineList, UserActivity.this);
                 recyclerView.setAdapter(myAdapter);
-            //}
+            }
         }
     }
 
